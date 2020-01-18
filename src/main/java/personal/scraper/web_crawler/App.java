@@ -93,6 +93,10 @@ public class App {
 			e.printStackTrace();
 		}
 	}
+	
+	int librarySize() {
+		return libraries.size();
+	}
 
 	public static void main(String[] args) {
 		Scanner in = new Scanner(System.in);

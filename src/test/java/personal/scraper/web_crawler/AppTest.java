@@ -1,38 +1,19 @@
 package personal.scraper.web_crawler;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.hamcrest.CoreMatchers.any;
+import static org.junit.Assert.assertNotEquals;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+import java.io.IOException;
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
+import org.junit.Before;
+import org.junit.Test;
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
-    }
+public class AppTest {
+	private App app = new App();
+
+	@Test
+	public void testProcessReq() {
+		app.processRequest("enrique iglesias");
+		assertNotEquals(app.librarySize(), 0);
+	}
 }
