@@ -1,18 +1,16 @@
 package personal.scraper.web_crawler.scraper;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/** 
+
+/**
  * Web crawler to scrape google results
  */
 public interface Scraper {
-	Document fetchPage(URL url) throws IOException;
-
-	List<Element> scrapeGoogle(String searchTerm);
+    List<Element> scrape(String searchTerm, int sampleSize);
+    Map<String, AtomicInteger> processScrapedData(List<Element> results);
 }
