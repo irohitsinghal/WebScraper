@@ -1,24 +1,27 @@
 package personal.scraper.web_crawler;
 
-import personal.scraper.web_crawler.scraper.GoogleScraper;
-import personal.scraper.web_crawler.scraper.ScrapeProcessor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
-
-/**
- * identify top used Javascript libraries
- */
+@Slf4j
+@SpringBootApplication
 public class Application {
 
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        System.out.print("Enter search Term: ");
-        String searchTerm = in.nextLine();
-        in.close();
-
-        ScrapeProcessor processor = new ScrapeProcessor(new GoogleScraper());
-        Map<String, AtomicInteger> libraries = processor.processRequest(searchTerm, 100);
+        log.info("STARTING THE APPLICATION");
+        SpringApplication.run(Application.class, args);
     }
+
+    /**@Bean public CommandLineRunner commandLineRunner(ScraperService scraperService) {
+    return args -> {
+    Scanner in = new Scanner(System.in);
+    log.info("Enter search Term: ");
+    String searchTerm = in.nextLine();
+    in.close();
+
+    List list = scraperService.getTopNUsedJavascriptLibraries(searchTerm, 5);
+    log.info(String.valueOf(list));
+    };
+    }*/
 }

@@ -1,0 +1,8 @@
+scraper:
+  search-sample-size: 100
+  google:
+    enabled: true
+    search-url: "https://www.google.com/search?q=%s&num=%s"
+    search-type:
+      - "Web results"
+      - "Twitter results"

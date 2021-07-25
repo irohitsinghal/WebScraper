@@ -1,8 +1,12 @@
 package personal.scraper.web_crawler.scraper;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -19,48 +23,51 @@ import java.util.stream.Stream;
 import static personal.scraper.web_crawler.utils.WebUtils.CHARSET;
 import static personal.scraper.web_crawler.utils.WebUtils.fetchPage;
 
-public class GoogleScraper implements Scraper {
+@Slf4j
+@Component
+@ConditionalOnProperty(value = "scraper.google.enabled", havingValue = "true")
+class GoogleScraper implements Scraper {
 
-    private String searchUrl;
-    private List<String> searchType;
+    private GoogleScraperProperties properties;
 
-    public GoogleScraper() {
-        this.searchUrl = "https://www.google.com/search?q=%s&num=%s";
-        this.searchType = Arrays.asList("Web results", "Twitter results");
+    @Autowired
+    public GoogleScraper(GoogleScraperProperties properties) {
+        log.info("Using REAL Google Scraper bean");
+        this.properties = properties;
     }
 
     public List<Element> scrape(String searchTerm, int sampleSize) {
         List<Element> results = new ArrayList<>();
         try {
-            URL url = new URL(String.format(searchUrl, URLEncoder.encode(searchTerm, CHARSET), sampleSize));
+            URL url = new URL(String.format(properties.getSearchUrl(), URLEncoder.encode(searchTerm, CHARSET), sampleSize));
 
-            System.out.println("Searching " + searchTerm + " on Google at url: " + url);
+            log.debug("Searching " + searchTerm + " on Google at url: " + url);
             Document doc = fetchPage(url);
             Elements headers = doc.select("h2");
 
             for (Element header : headers) {
-                if (!searchType.contains(header.text()))
+                if (!properties.getSearchType().contains(header.text()))
                     continue;
                 results.addAll(Arrays.asList(header.nextElementSibling().children().toArray(new Element[]{})));
             }
         } catch (MalformedURLException e) {
-            System.out.println("Not able to create google search url with query " + searchTerm + ". Aborting!\n" + e.getMessage());
+            log.error("Not able to create google search url with query " + searchTerm + ". Aborting!\n" + e.getMessage());
         } catch (IOException e) {
-            System.out.println("Cannot fetch search results currently. Aborting!\n" + e.getMessage());
+            log.error("Cannot fetch search results currently. Aborting!\n" + e.getMessage());
         }
         return results;
     }
 
-    public Map<String, AtomicInteger> processScrapedData(List<Element> results) {
+    public Map<String, AtomicInteger> extractAllJsLibrariesByUsage(List<Element> elements) {
         Map<String, AtomicInteger> libraries = new ConcurrentHashMap<String, AtomicInteger>();
 
-        results.parallelStream().forEach(result -> {
+        elements.parallelStream().forEach(result -> {
             String childUrl = null;
             try {
                 childUrl = result.select("a[href]").first().absUrl("href");
                 extractJS(fetchPage(new URL(childUrl)).head(), libraries);
             } catch (IOException e) {
-                System.out.println("Could not fetch page: " + childUrl);
+                log.error("Could not fetch page: " + childUrl);
             }
         });
 
@@ -82,7 +89,7 @@ public class GoogleScraper implements Scraper {
                     return v;
                 });
             } catch (MalformedURLException e) {
-                System.out.println("Could not get js file: " + e.getMessage());
+                log.error("Could not get js file: " + e.getMessage());
             }
         });
     }
